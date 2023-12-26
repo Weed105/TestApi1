@@ -1,0 +1,38 @@
+version: '3.4'
+
+networks:
+  dev:
+    driver: bridge
+
+services:
+  testapi1:
+    image: ${DOCKER_REGISTRY-}testapi1
+    depends_on:
+    - "app_db"
+    container_name: testapi1
+    ports:
+    - "80:80"
+    build:
+        context: .
+        dockerfile: TestApi1/Dockerfile
+    environment:
+    - ConnectionStrings__DefaultConnection=host=app_db;username=root;password=1234;port=3306;database=union_DB;
+    - ASPNETCORE_URLS=http://+:80
+    networks:
+    - dev
+
+  app_db:
+    image: mysql
+    container_name: app_db
+    environment:
+    - MYSQL_ROOT_PASSWORD=1234
+    - MYSQL_DATABASE=UnionDB
+    ports:
+    - "3307:3306"
+    restart: always
+    volumes:
+    - app_data:/var/lib/mysql/
+    networks:
+    - dev
+volumes:
+  app_data:
